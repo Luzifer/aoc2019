@@ -5,7 +5,7 @@ This repository contains my solutions for [Advent of Code 2019](https://adventof
 To execute them just use the tests for the respective day:
 
 ```console
-# go test -v day01.go day01_test.go
+# go test -v day01.go day01_test.go helpers.go
 === RUN   TestCalculateDay1_Examples
 --- PASS: TestCalculateDay1_Examples (0.00s)
 === RUN   TestCalculateDay1_Part1
