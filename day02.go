@@ -2,61 +2,15 @@ package aoc2019
 
 import (
 	"io/ioutil"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
 )
 
-func parseDay02Intcode(code string) ([]int, error) {
-	parts := strings.Split(code, ",")
-
-	var out []int
-	for _, n := range parts {
-		v, err := strconv.Atoi(n)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, v)
-	}
-
-	return out, nil
-}
+func parseDay02Intcode(code string) ([]int, error) { return parseIntcode(code) }
 
 func executeDay02Intcode(code []int) ([]int, error) {
-	var (
-		pos int
-		run = true
-	)
-
-	for run {
-		if pos >= len(code) {
-			return nil, errors.Errorf("Code position out of bounds: %d (len=%d)", pos, len(code))
-		}
-
-		switch code[pos] {
-		case 1:
-			// addition
-			p1, p2, pt := code[pos+1], code[pos+2], code[pos+3]
-			code[pt] = code[p1] + code[p2]
-
-		case 2:
-			// multiplication
-			p1, p2, pt := code[pos+1], code[pos+2], code[pos+3]
-			code[pt] = code[p1] * code[p2]
-
-		case 99:
-			// program finished
-			run = false
-
-		default:
-			return nil, errors.Errorf("Encountered invalid operation %d", code[pos])
-		}
-
-		pos += 4
-	}
-
-	return code, nil
+	return executeIntcode(code, nil, nil) // Day02 intcode may not contain I/O
 }
 
 func solveDay2Part1(inFile string) (int, error) {
