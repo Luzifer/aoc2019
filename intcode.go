@@ -63,6 +63,14 @@ func parseOpCode(in int) opCode {
 	return out
 }
 
+func cloneIntcode(in []int) []int {
+	out := make([]int, len(in))
+	for i, v := range in {
+		out[i] = v
+	}
+	return out
+}
+
 func parseIntcode(code string) ([]int, error) {
 	parts := strings.Split(code, ",")
 
