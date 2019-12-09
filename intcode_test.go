@@ -1,9 +1,12 @@
 package aoc2019
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestParseOpCode(t *testing.T) {
-	for code, expOpCode := range map[int]opCode{
+	for code, expOpCode := range map[int64]opCode{
 		1002: {Type: opCodeTypeMultiplication, flags: []opCodeFlag{opCodeFlagPosition, opCodeFlagImmediate}},
 		1101: {Type: opCodeTypeAddition, flags: []opCodeFlag{opCodeFlagImmediate, opCodeFlagImmediate}},
 	} {
@@ -17,9 +20,9 @@ func TestExecuteIntcodeIO(t *testing.T) {
 	code, _ := parseIntcode("3,0,4,0,99")
 
 	var (
-		exp = 25
-		in  = make(chan int, 1)
-		out = make(chan int, 1)
+		exp int64 = 25
+		in        = make(chan int64, 1)
+		out       = make(chan int64, 1)
 	)
 
 	in <- exp
@@ -41,8 +44,8 @@ func TestExecuteIntcodeImmediateFlag(t *testing.T) {
 	code, _ := parseIntcode("102,4,7,0,4,0,99,3")
 
 	var (
-		exp = 12
-		out = make(chan int, 1)
+		exp int64 = 12
+		out       = make(chan int64, 1)
 	)
 
 	if _, err := executeIntcode(code, nil, out); err != nil {
@@ -60,15 +63,15 @@ func TestExecuteIntcodeEquals(t *testing.T) {
 		"immediate": "3,3,1108,-1,8,3,4,3,99",
 	} {
 
-		for input, exp := range map[int]int{
+		for input, exp := range map[int64]int64{
 			1:  0,
 			8:  1,
 			20: 0,
 			-8: 0,
 		} {
 			var (
-				in  = make(chan int, 1)
-				out = make(chan int, 10)
+				in  = make(chan int64, 1)
+				out = make(chan int64, 10)
 			)
 
 			code, _ := parseIntcode(codeStr)
@@ -93,15 +96,15 @@ func TestExecuteIntcodeLessThan(t *testing.T) {
 		"immediate": "3,3,1107,-1,8,3,4,3,99",
 	} {
 
-		for input, exp := range map[int]int{
+		for input, exp := range map[int64]int64{
 			1:  1,
 			8:  0,
 			20: 0,
 			-8: 1,
 		} {
 			var (
-				in  = make(chan int, 1)
-				out = make(chan int, 10)
+				in  = make(chan int64, 1)
+				out = make(chan int64, 10)
 			)
 
 			code, _ := parseIntcode(codeStr)
@@ -126,13 +129,13 @@ func TestExecuteIntcodeJump(t *testing.T) {
 		"immediate": "3,3,1105,-1,9,1101,0,0,12,4,12,99,1",
 	} {
 
-		for input, exp := range map[int]int{
+		for input, exp := range map[int64]int64{
 			5: 1,
 			0: 0,
 		} {
 			var (
-				in  = make(chan int, 1)
-				out = make(chan int, 10)
+				in  = make(chan int64, 1)
+				out = make(chan int64, 10)
 			)
 
 			code, _ := parseIntcode(codeStr)
@@ -148,5 +151,46 @@ func TestExecuteIntcodeJump(t *testing.T) {
 
 		}
 
+	}
+}
+
+func TestExecuteIntcodeRelativeBase(t *testing.T) {
+	code, _ := parseIntcode("109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99")
+
+	var (
+		codeCopy []int64
+		out      = make(chan int64, 1)
+	)
+
+	go func() {
+		if _, err := executeIntcode(code, nil, out); err != nil {
+			t.Fatalf("Intcode execution failed: %s", err)
+		}
+	}()
+
+	for v := range out {
+		codeCopy = append(codeCopy, v)
+	}
+
+	if !reflect.DeepEqual(codeCopy, code) {
+		t.Errorf("Program yield unexpected result: exp=%d got=%d", code, codeCopy)
+	}
+}
+
+func TestExecuteIntcodeLargeNumber(t *testing.T) {
+	for codeStr, expValue := range map[string]int64{
+		"1102,34915192,34915192,7,4,7,99,0": 1219070632396864,
+		"104,1125899906842624,99":           1125899906842624,
+	} {
+		code, _ := parseIntcode(codeStr)
+		var out = make(chan int64, 1)
+
+		if _, err := executeIntcode(code, nil, out); err != nil {
+			t.Fatalf("Intcode execution failed: %s", err)
+		}
+
+		if r := <-out; r != expValue {
+			t.Errorf("Execute yield unexpected result: exp=%d got=%d", expValue, r)
+		}
 	}
 }

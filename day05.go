@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func solveDay5FromFile(inFile string, diagProgram int) (int, error) {
+func solveDay5FromFile(inFile string, diagProgram int64) (int64, error) {
 	raw, err := ioutil.ReadFile(inFile)
 	if err != nil {
 		return 0, errors.Wrap(err, "Unable to read input")
@@ -19,9 +19,9 @@ func solveDay5FromFile(inFile string, diagProgram int) (int, error) {
 	}
 
 	var (
-		in      = make(chan int, 1)
-		out     = make(chan int, len(code)) // There cannot be more outputs than number of code parts
-		outputs []int
+		in      = make(chan int64, 1)
+		out     = make(chan int64, len(code)) // There cannot be more outputs than number of code parts
+		outputs []int64
 	)
 
 	/*
@@ -52,7 +52,7 @@ func solveDay5FromFile(inFile string, diagProgram int) (int, error) {
 	return outputs[len(outputs)-1], nil
 }
 
-func solveDay5Part1(inFile string) (int, error) {
+func solveDay5Part1(inFile string) (int64, error) {
 	/*
 	 * The TEST diagnostic program will start by requesting from the user
 	 * the ID of the system to test by running an input instruction - provide
@@ -61,7 +61,7 @@ func solveDay5Part1(inFile string) (int, error) {
 	return solveDay5FromFile(inFile, 1)
 }
 
-func solveDay5Part2(inFile string) (int, error) {
+func solveDay5Part2(inFile string) (int64, error) {
 	/*
 	 * This time, when the TEST diagnostic program runs its input
 	 * instruction to get the ID of the system to test, provide it 5,

@@ -7,13 +7,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-func parseDay02Intcode(code string) ([]int, error) { return parseIntcode(code) }
+func parseDay02Intcode(code string) ([]int64, error) { return parseIntcode(code) }
 
-func executeDay02Intcode(code []int) ([]int, error) {
+func executeDay02Intcode(code []int64) ([]int64, error) {
 	return executeIntcode(code, nil, nil) // Day02 intcode may not contain I/O
 }
 
-func solveDay2Part1(inFile string) (int, error) {
+func solveDay2Part1(inFile string) (int64, error) {
 	raw, err := ioutil.ReadFile(inFile)
 	if err != nil {
 		return 0, errors.Wrap(err, "Unable to read input")
@@ -37,16 +37,16 @@ func solveDay2Part1(inFile string) (int, error) {
 	return code[0], nil
 }
 
-func solveDay2Part2(inFile string) (int, error) {
+func solveDay2Part2(inFile string) (int64, error) {
 	raw, err := ioutil.ReadFile(inFile)
 	if err != nil {
 		return 0, errors.Wrap(err, "Unable to read input")
 	}
 
-	const expectedResult int = 19690720
+	const expectedResult int64 = 19690720
 
-	for noun := 0; noun < 100; noun++ {
-		for verb := 0; verb < 100; verb++ {
+	for noun := int64(0); noun < 100; noun++ {
+		for verb := int64(0); verb < 100; verb++ {
 
 			// Re-initialize "memory"
 			code, err := parseDay02Intcode(strings.TrimSpace(string(raw)))

@@ -7,17 +7,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-func day07TestMaxOutputFromChain(code []int, chainStart, chainEnd int, looped bool) int {
+func day07TestMaxOutputFromChain(code []int64, chainStart, chainEnd int, looped bool) int64 {
 	var (
 		chainLen = chainEnd - chainStart + 1
-		permuts  [][]int
-		permute  func(a []int, k int)
-		rootSeq  = make([]int, chainLen)
+		permuts  [][]int64
+		permute  func(a []int64, k int)
+		rootSeq  = make([]int64, chainLen)
 	)
 
-	permute = func(a []int, k int) {
+	permute = func(a []int64, k int) {
 		if k == len(a) {
-			permuts = append(permuts, append([]int{}, a...))
+			permuts = append(permuts, append([]int64{}, a...))
 		} else {
 			for i := k; i < len(rootSeq); i++ {
 				a[k], a[i] = a[i], a[k]
@@ -28,20 +28,20 @@ func day07TestMaxOutputFromChain(code []int, chainStart, chainEnd int, looped bo
 	}
 
 	for i := range rootSeq {
-		rootSeq[i] = chainStart + i
+		rootSeq[i] = int64(chainStart + i)
 	}
 	permute(rootSeq, 0)
 
-	var maxOutput int
+	var maxOutput int64
 	for _, seq := range permuts {
 		var (
-			commInChans = make([]chan int, chainLen)
-			commOut     = make(chan int, 2)
+			commInChans = make([]chan int64, chainLen)
+			commOut     = make(chan int64, 2)
 		)
 
 		// Create channels
 		for i := range commInChans {
-			commInChans[i] = make(chan int, 2)
+			commInChans[i] = make(chan int64, 2)
 		}
 
 		// Build execution chain
@@ -56,7 +56,7 @@ func day07TestMaxOutputFromChain(code []int, chainStart, chainEnd int, looped bo
 		}
 		commInChans[0] <- 0 // Input signal
 
-		var lastOutput int
+		var lastOutput int64
 		for r := range commOut {
 			lastOutput = r
 			if looped {
@@ -73,7 +73,7 @@ func day07TestMaxOutputFromChain(code []int, chainStart, chainEnd int, looped bo
 	return maxOutput
 }
 
-func solveDay7Part1(inFile string) (int, error) {
+func solveDay7Part1(inFile string) (int64, error) {
 	raw, err := ioutil.ReadFile(inFile)
 	if err != nil {
 		return 0, errors.Wrap(err, "Unable to read input file")
@@ -87,7 +87,7 @@ func solveDay7Part1(inFile string) (int, error) {
 	return day07TestMaxOutputFromChain(code, 0, 4, false), nil
 }
 
-func solveDay7Part2(inFile string) (int, error) {
+func solveDay7Part2(inFile string) (int64, error) {
 	raw, err := ioutil.ReadFile(inFile)
 	if err != nil {
 		return 0, errors.Wrap(err, "Unable to read input file")
