@@ -3,12 +3,13 @@ package aoc2019
 import (
 	"image"
 	"image/color"
+	"image/png"
 	"io/ioutil"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 
-	"github.com/llgcode/draw2d/draw2dimg"
 	"github.com/pkg/errors"
 )
 
@@ -145,9 +146,13 @@ func debugDay3DrawImage(l1, l2 day3Line) error {
 	// Draw "home-point" in green
 	dest.SetRGBA(0, 0, color.RGBA{0x0, 0xff, 0x0, 0xff})
 
-	draw2dimg.SaveToPngFile("day03_debug.png", dest)
+	f, err := os.Create("day03_debug.png")
+	if err != nil {
+		return errors.Wrap(err, "Unable to open output file")
+	}
+	defer f.Close()
 
-	return nil
+	return errors.Wrap(png.Encode(f, dest), "Unable to write image")
 }
 
 func getDay3MinIntersectionDistance(l1, l2 day3Line, originX, originY int) int {
