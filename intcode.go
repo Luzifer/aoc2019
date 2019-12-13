@@ -1,12 +1,15 @@
 package aoc2019
 
 import (
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
 )
+
+var intcodeDebugging = false
 
 type opCodeFlag int64
 
@@ -88,14 +91,26 @@ func parseIntcode(code string) ([]int64, error) {
 	return out, nil
 }
 
-func executeIntcode(code []int64, in, out chan int64) ([]int64, error) {
+func executeIntcode(code []int64, in interface{}, out chan int64) ([]int64, error) {
 	var (
+		inCB         func() (int64, error)
 		pos          int64
 		relativeBase int64
 	)
 
 	if out != nil {
 		defer close(out)
+	}
+
+	switch in.(type) {
+	case nil:
+		inCB = func() (int64, error) { return 0, errors.New("No input available") }
+	case chan int64:
+		inCB = func() (int64, error) { return <-(in.(chan int64)), nil }
+	case func() (int64, error):
+		inCB = in.(func() (int64, error))
+	default:
+		return nil, errors.New("Unsupported input type")
 	}
 
 	transformPos := func(param int64, op opCode, write bool) int64 {
@@ -156,6 +171,11 @@ func executeIntcode(code []int64, in, out chan int64) ([]int64, error) {
 
 		// Position is expected to be an OpCode
 		op := parseOpCode(code[pos])
+
+		if intcodeDebugging {
+			log.Printf("OpCode execution: %#v", op)
+		}
+
 		switch op.Type {
 
 		case opCodeTypeAddition: // p1 + p2 => p3
@@ -167,7 +187,11 @@ func executeIntcode(code []int64, in, out chan int64) ([]int64, error) {
 			pos += 4
 
 		case opCodeTypeInput: // in => p1
-			setParamValue(1, <-in, op)
+			v, err := inCB()
+			if err != nil {
+				return nil, errors.Wrap(err, "Unable to read input")
+			}
+			setParamValue(1, v, op)
 			pos += 2
 
 		case opCodeTypeOutput: // p1 => out
