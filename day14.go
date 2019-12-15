@@ -3,7 +3,6 @@ package aoc2019
 import (
 	"bufio"
 	"io"
-	"log"
 	"math"
 	"os"
 	"strconv"
@@ -136,8 +135,6 @@ func solveDay14Part2(inFile string) (int64, error) {
 			test    = (minBound + maxBound) / 2
 			oreUsed = factory.calculateOreForFuel(test)
 		)
-
-		log.Printf("limit=%d used=%d min=%d max=%d test=%d", limit, oreUsed, minBound, maxBound, test)
 
 		switch {
 		case minBound+1 == maxBound && oreUsed < limit:
